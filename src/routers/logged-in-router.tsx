@@ -1,7 +1,7 @@
 import React from "react";
 import { isLoggedInVar } from "../apollo";
 
-export const LoggedInRouter = () => {
+const LoggedInRouter = () => {
   const onBtnClick = () => {
     isLoggedInVar(false);
   };
@@ -12,3 +12,5 @@ export const LoggedInRouter = () => {
     </div>
   );
 };
+
+export default LoggedInRouter;
