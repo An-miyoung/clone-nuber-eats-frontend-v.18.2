@@ -10,8 +10,8 @@ import {
 } from "../__generated__/graphql";
 
 const LOGIN_MUTATION = gql(/* GraphQL */ `
-  mutation login($email: String!, $password: String!) {
-    login(input: { email: $email, password: $password }) {
+  mutation login($loginInput: LoginInput!) {
+    login(input: $loginInput) {
       ok
       error
       token
@@ -31,21 +31,35 @@ const Login = () => {
     formState: { errors },
   } = useForm<ILoginForm>();
 
-  const onSubmit: SubmitHandler<ILoginForm> = (data) => {
-    const { email, password } = data;
-    loginMutation({
-      variables: {
-        email,
-        password,
-      },
-    });
+  const onCompleted = (data: LoginMutation) => {
+    const {
+      login: { ok, token },
+    } = data;
+    if (ok) {
+      console.log(token);
+    }
   };
 
-  const [loginMutation, { loading, error, data: fetchData }] = useMutation<
+  const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
     LoginMutation,
     LoginMutationVariables
-  >(LOGIN_MUTATION);
-  console.log(fetchData);
+  >(LOGIN_MUTATION, {
+    onCompleted,
+  });
+
+  const onSubmit: SubmitHandler<ILoginForm> = (data) => {
+    if (!loading) {
+      const { email, password } = data;
+      loginMutation({
+        variables: {
+          loginInput: {
+            email,
+            password,
+          },
+        },
+      });
+    }
+  };
 
   return (
     <div className=" h-screen flex items-center justify-center bg-gray-800">
@@ -91,7 +105,12 @@ const Login = () => {
             <FormError errorMessage="9글자이하로 입력하세요" />
           )}
 
-          <button className="btn mt-3">로그인</button>
+          <button className="btn mt-3">
+            {loading ? "로딩중..." : "로그인"}
+          </button>
+          {loginMutationResult?.login.error && (
+            <FormError errorMessage={loginMutationResult.login.error} />
+          )}
         </form>
       </div>
     </div>
