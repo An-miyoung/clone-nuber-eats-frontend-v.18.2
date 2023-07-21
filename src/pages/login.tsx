@@ -8,6 +8,9 @@ import {
   LoginMutation,
   LoginMutationVariables,
 } from "../__generated__/graphql";
+import NuberLogo from "../components/nuberLogo";
+import Button from "../components/button";
+import { Link } from "react-router-dom";
 
 const LOGIN_MUTATION = gql(/* GraphQL */ `
   mutation login($loginInput: LoginInput!) {
@@ -28,8 +31,10 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<ILoginForm>();
+    formState: { errors, isValid },
+  } = useForm<ILoginForm>({
+    mode: "onBlur",
+  });
 
   const onCompleted = (data: LoginMutation) => {
     const {
@@ -62,13 +67,21 @@ const Login = () => {
   };
 
   return (
-    <div className=" h-screen flex items-center justify-center bg-gray-800">
+    <div className=" h-screen flex flex-col items-center mt-10 lg:mt-28">
       <Helmet>
         <title>Login | Nuber Eats</title>
       </Helmet>
-      <div className=" bg-white w-full max-w-screen-sm p-8 rounded-lg text-center">
-        <h1 className=" font-bold text-3xl text-gray-800">Log In</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className=" flex flex-col mt-5">
+      <div className="w-full max-w-screen-sm flex flex-col items-center px-5">
+        <div className="w-52 mb-10">
+          <NuberLogo />
+        </div>
+        <h4 className="w-full text-left text-3xl font-medium pl-2">
+          Welcome back
+        </h4>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full flex flex-col mt-5 mb-3"
+        >
           <input
             {...register("email", {
               required: "필수항목입니다.",
@@ -95,7 +108,7 @@ const Login = () => {
             name="password"
             type="password"
             placeholder="5글자이상 9글자이하의 비밀번호"
-            className="input mt-3"
+            className="input my-3"
             required
           />
           {errors.password?.type === "minLength" && (
@@ -105,13 +118,21 @@ const Login = () => {
             <FormError errorMessage="9글자이하로 입력하세요" />
           )}
 
-          <button className="btn mt-3">
-            {loading ? "로딩중..." : "로그인"}
-          </button>
+          <Button canClick={isValid} loading={loading} actionText="로그인" />
           {loginMutationResult?.login.error && (
             <FormError errorMessage={loginMutationResult.login.error} />
           )}
         </form>
+        <div>
+          처음이신가요?
+          <span>{`  `}</span>
+          <Link
+            to="/create-account"
+            className=" text-lime-600 underline hover:underline"
+          >
+            가입해서 계정을 만드세요.
+          </Link>
+        </div>
       </div>
     </div>
   );
