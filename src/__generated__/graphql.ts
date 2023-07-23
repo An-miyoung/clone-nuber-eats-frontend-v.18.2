@@ -55,7 +55,7 @@ export type CategoryOutput = {
 export type CreateAccountInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
-  role: UseRole;
+  role: UserRole;
 };
 
 export type CreateAccountOutput = {
@@ -542,12 +542,6 @@ export type TakeOrderOutput = {
   ok: Scalars['Boolean']['output'];
 };
 
-export enum UseRole {
-  Client = 'Client',
-  Delivery = 'Delivery',
-  Owner = 'Owner'
-}
-
 export type User = {
   __typename?: 'User';
   created_at: Scalars['DateTime']['output'];
@@ -558,7 +552,7 @@ export type User = {
   payments: Array<Payment>;
   restaurants: Array<Restaurant>;
   rides: Array<Order>;
-  role: UseRole;
+  role: UserRole;
   updated_at: Scalars['DateTime']['output'];
   verified: Scalars['Boolean']['output'];
 };
@@ -574,6 +568,12 @@ export type UserProfileOutput = {
   user?: Maybe<User>;
 };
 
+export enum UserRole {
+  Client = 'Client',
+  Delivery = 'Delivery',
+  Owner = 'Owner'
+}
+
 export type VerifyEmailInput = {
   code: Scalars['String']['input'];
 };
@@ -584,6 +584,13 @@ export type VerifyEmailOutput = {
   ok: Scalars['Boolean']['output'];
 };
 
+export type CreateAccountMutationVariables = Exact<{
+  createAccountInput: CreateAccountInput;
+}>;
+
+
+export type CreateAccountMutation = { __typename?: 'Mutation', createAccount: { __typename?: 'CreateAccountOutput', ok: boolean, error?: string | null } };
+
 export type LoginMutationVariables = Exact<{
   loginInput: LoginInput;
 }>;
@@ -592,4 +599,5 @@ export type LoginMutationVariables = Exact<{
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginOutput', ok: boolean, error?: string | null, token?: string | null } };
 
 
+export const CreateAccountDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createAccount"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createAccountInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateAccountInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAccount"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createAccountInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ok"}},{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]} as unknown as DocumentNode<CreateAccountMutation, CreateAccountMutationVariables>;
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"loginInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"loginInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ok"}},{"kind":"Field","name":{"kind":"Name","value":"error"}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;

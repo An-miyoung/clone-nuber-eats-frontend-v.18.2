@@ -11,6 +11,8 @@ import {
 import NuberLogo from "../components/nuberLogo";
 import Button from "../components/button";
 import { Link } from "react-router-dom";
+import { authTokenVar, isLoggedInVar } from "../apollo";
+import { LOCALSTORAGE_TOKEN } from "../constants";
 
 const LOGIN_MUTATION = gql(/* GraphQL */ `
   mutation login($loginInput: LoginInput!) {
@@ -40,7 +42,7 @@ const Login = () => {
     const {
       login: { ok, token },
     } = data;
-    if (ok) {
+    if (ok && token) {
       console.log(token);
     }
   };
@@ -69,14 +71,14 @@ const Login = () => {
   return (
     <div className=" h-screen flex flex-col items-center mt-10 lg:mt-28">
       <Helmet>
-        <title>Login | Nuber Eats</title>
+        <title>로그인 | Nuber Eats</title>
       </Helmet>
       <div className="w-full max-w-screen-sm flex flex-col items-center px-5">
         <div className="w-52 mb-10">
           <NuberLogo />
         </div>
         <h4 className="w-full text-left text-3xl font-medium pl-2">
-          Welcome back
+          어서 오세요.
         </h4>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -85,7 +87,8 @@ const Login = () => {
           <input
             {...register("email", {
               required: "필수항목입니다.",
-              pattern: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+              pattern:
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             })}
             aria-invalid={errors.email ? true : false}
             name="email"
