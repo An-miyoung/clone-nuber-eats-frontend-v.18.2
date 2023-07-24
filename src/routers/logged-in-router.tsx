@@ -1,8 +1,10 @@
 import React from "react";
-import { isLoggedInVar } from "../apollo";
 import { gql } from "../__generated__/gql";
 import { useQuery } from "@apollo/client";
-import { MeQuery } from "../__generated__/graphql";
+import { MeQuery, UserRole } from "../__generated__/graphql";
+import { Route, Routes } from "react-router-dom";
+import Restaurnats from "../pages/client/restaurnats";
+import PageNotFound from "../pages/404";
 
 const ME_QUERY = gql(/* GraphQL */ `
   query me {
@@ -14,6 +16,13 @@ const ME_QUERY = gql(/* GraphQL */ `
     }
   }
 `);
+
+const ClientRouters = [
+  {
+    path: "/",
+    element: <Restaurnats />,
+  },
+];
 
 const LoggedInRouter = () => {
   const { data, loading, error } = useQuery<MeQuery>(ME_QUERY);
@@ -30,7 +39,15 @@ const LoggedInRouter = () => {
     );
   }
 
-  return <div>Me Query</div>;
+  return (
+    <Routes>
+      {data.me.role === UserRole.Client &&
+        ClientRouters.map((router, idx) => (
+          <Route path={router.path} element={router.element} key={idx}></Route>
+        ))}
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
+  );
 };
 
 export default LoggedInRouter;
