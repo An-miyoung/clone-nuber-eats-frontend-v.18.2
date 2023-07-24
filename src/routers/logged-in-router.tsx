@@ -6,6 +6,7 @@ import PageNotFound from "../pages/404";
 import Header from "../components/header";
 import { useMe } from "../hooks/useMe";
 import ConfirmEmail from "../pages/user/confirm-email";
+import EditProfile from "../pages/user/edit-profile";
 
 const ClientRouters = [
   {
@@ -15,6 +16,10 @@ const ClientRouters = [
   {
     path: "/confirm",
     element: <ConfirmEmail />,
+  },
+  {
+    path: "/edit-profile",
+    element: <EditProfile />,
   },
 ];
 

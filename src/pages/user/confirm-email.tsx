@@ -25,17 +25,17 @@ const ConfirmEmail = () => {
   const { data: userData } = useMe();
 
   const onCompleted = (data: VerifyEmailMutation) => {
-    // 처리속도를 높이기 위해 DB 에 쓰기 전에 apollo cache 내용을 먼저 바꿔준다.
-    // writeFragment 는 id, fragment, data 를 입력해주면 오류가 사라진다.
-    // gql 을 @apollo/client 에서 사용해야 한다는 점
     const {
       verifyEmail: { ok },
     } = data;
     if (ok && userData) {
+      // 처리속도를 높이기 위해 DB 에 쓰기 전에 apollo cache 내용을 먼저 바꿔준다.
+      // gql 을 @apollo/client 에서 사용해야 한다는 점
       client.writeFragment({
+        // writeFragment 는 id, fragment, data 를 입력해주면 오류가 사라진다.
         id: `User:${userData.me.id}`,
         fragment: Gql`
-        fragment verifiedUser on User {
+        fragment VerifiedUser on User {
           verified
         }
         `,
@@ -46,6 +46,14 @@ const ConfirmEmail = () => {
       navigate("/");
     }
   };
+
+  // useMe = useQuery , useQuery 는 refetch 라는 메소드가 있다.
+  // refetch 를 쓰면 apollo 가 자동으로 cache 를 업댓한다.
+  // const { data: userData, refetch } = useMe();
+  // if (ok && userData) {
+  //   await refetch()
+  //   navigate("/");
+  // }
 
   const [verifyEmailMutation] = useMutation<
     VerifyEmailMutation,
