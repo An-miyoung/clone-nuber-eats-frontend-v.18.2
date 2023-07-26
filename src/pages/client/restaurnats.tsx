@@ -34,6 +34,7 @@ const RESTAURANTS_QUERY = gql(/* GraphQL */ `
         coverImg
         category {
           name
+          slug
         }
         address
         isPromoted

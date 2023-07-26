@@ -13,7 +13,7 @@ const Category: React.FC<ICategoryProps> = ({ id, coverImg, name, slug }) => {
     <Link to={`/category/${slug}`} key={id}>
       <div
         key={id}
-        className=" w-16 md:w-20 flex flex-col group justify-center items-center cursor-pointer "
+        className=" w-16 md:w-20 flex flex-col group justify-center items-center cursor-pointer"
       >
         <div
           style={{ backgroundImage: `url(${coverImg})` }}

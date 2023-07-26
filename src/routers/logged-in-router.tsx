@@ -9,12 +9,10 @@ import ConfirmEmail from "../pages/user/confirm-email";
 import EditProfile from "../pages/user/edit-profile";
 import Search from "../pages/client/search";
 import CategoryPage from "../pages/client/category";
+import Restaurant from "../pages/client/restaurant";
+import OwnerRestaurants from "../pages/owner/owner-restaurants";
 
-const ClientRouters = [
-  {
-    path: "/",
-    element: <Restaurnats />,
-  },
+const CommonRouters = [
   {
     path: "/confirm",
     element: <ConfirmEmail />,
@@ -23,6 +21,13 @@ const ClientRouters = [
     path: "/edit-profile",
     element: <EditProfile />,
   },
+];
+
+const ClientRouters = [
+  {
+    path: "/",
+    element: <Restaurnats />,
+  },
   {
     path: "/search",
     element: <Search />,
@@ -30,6 +35,17 @@ const ClientRouters = [
   {
     path: "/category/:slug",
     element: <CategoryPage />,
+  },
+  {
+    path: "/restaurant/:id",
+    element: <Restaurant />,
+  },
+];
+
+const RestaurantRouters = [
+  {
+    path: "/",
+    element: <OwnerRestaurants />,
   },
 ];
 
@@ -53,12 +69,15 @@ const LoggedInRouter = () => {
       <Routes>
         {data.me.role === UserRole.Client &&
           ClientRouters.map((router, idx) => (
-            <Route
-              path={router.path}
-              element={router.element}
-              key={idx}
-            ></Route>
+            <Route path={router.path} element={router.element} key={idx} />
           ))}
+        {data.me.role === UserRole.Owner &&
+          RestaurantRouters.map((router, idx) => (
+            <Route path={router.path} element={router.element} key={idx} />
+          ))}
+        {CommonRouters.map((router, idx) => (
+          <Route path={router.path} element={router.element} key={idx} />
+        ))}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
