@@ -7,6 +7,8 @@ import Header from "../components/header";
 import { useMe } from "../hooks/useMe";
 import ConfirmEmail from "../pages/user/confirm-email";
 import EditProfile from "../pages/user/edit-profile";
+import Search from "../pages/client/search";
+import CategoryPage from "../pages/client/category";
 
 const ClientRouters = [
   {
@@ -20,6 +22,14 @@ const ClientRouters = [
   {
     path: "/edit-profile",
     element: <EditProfile />,
+  },
+  {
+    path: "/search",
+    element: <Search />,
+  },
+  {
+    path: "/category/:slug",
+    element: <CategoryPage />,
   },
 ];
 
