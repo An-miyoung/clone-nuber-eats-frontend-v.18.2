@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -23,13 +23,14 @@ const CREATE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
 
 interface ICreateRestaurantForm {
   name: string;
-  coverImg: string;
   address: string;
   categoryName: string;
+  file: FileList;
 }
 
 const CreateRestaurant = () => {
   const navigate = useNavigate();
+  const [uploading, setUploading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -38,19 +39,37 @@ const CreateRestaurant = () => {
     mode: "onBlur",
   });
 
-  const onSubmit: SubmitHandler<ICreateRestaurantForm> = (data) => {
-    console.log(data);
-    const { name, coverImg, address, categoryName } = data;
-    createRestaurantMutation({
-      variables: {
-        input: {
-          name,
-          coverImg,
-          address,
-          categoryName,
+  const onSubmit: SubmitHandler<ICreateRestaurantForm> = async (data) => {
+    try {
+      setUploading(true);
+      const { name, file, address, categoryName } = data;
+      const actualFile = file[0];
+      const formBody = new FormData();
+      formBody.append("file", actualFile);
+
+      // graphQl mutation을 통해 file을 처리하지 못한다. 그래서 API post
+      const { url: coverImg } = await (
+        await fetch("http://localhost:4000/uploads/", {
+          method: "POST",
+          body: formBody,
+        })
+      ).json();
+
+      createRestaurantMutation({
+        variables: {
+          input: {
+            name,
+            coverImg,
+            address,
+            categoryName,
+          },
         },
-      },
-    });
+      });
+
+      setUploading(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onCompleted = (data: CreateRestaurantMutation) => {
@@ -58,11 +77,12 @@ const CreateRestaurant = () => {
       createRestaurant: { ok, restaurantId },
     } = data;
     if (ok) {
-      navigate(`/restaurant/${restaurantId}`);
+      setUploading(false);
+      navigate("/");
     }
   };
 
-  const [createRestaurantMutation, { data: cresteRestaurantResult, loading }] =
+  const [createRestaurantMutation, { data: cresteRestaurantResult }] =
     useMutation<CreateRestaurantMutation, CreateRestaurantMutationVariables>(
       CREATE_RESTAURANT_MUTATION,
       {
@@ -102,15 +122,17 @@ const CreateRestaurant = () => {
           {errors.name?.type === "maxLength" && (
             <FormError errorMessage="20글자이하로 입력하세요" />
           )}
-
+          <h4 className="text-sm text-gray-400 pl-3 mt-4">
+            * 음식점의 대표이미지 파일을 선택해주세요.
+          </h4>
           <input
-            {...register("coverImg", {
+            {...register("file", {
               required: "필수항목입니다.",
             })}
-            name="coverImg"
-            type="text"
-            placeholder="음식점의 대표이미지"
-            className="input my-3"
+            accept="image/*"
+            name="file"
+            type="file"
+            className="input mb-3"
             required
           />
           <input
@@ -135,7 +157,7 @@ const CreateRestaurant = () => {
           />
           <Button
             canClick={isValid}
-            loading={loading}
+            loading={uploading}
             actionText="음식점 만들기"
           />
           {cresteRestaurantResult?.createRestaurant.error && (
