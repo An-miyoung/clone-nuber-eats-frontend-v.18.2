@@ -10,7 +10,8 @@ import EditProfile from "../pages/user/edit-profile";
 import Search from "../pages/client/search";
 import CategoryPage from "../pages/client/category";
 import Restaurant from "../pages/client/restaurant";
-import OwnerRestaurants from "../pages/owner/owner-restaurants";
+import MyRestaurants from "../pages/owner/owner-restaurants";
+import CreateRestaurant from "../pages/owner/create-restaurant";
 
 const CommonRouters = [
   {
@@ -45,7 +46,11 @@ const ClientRouters = [
 const RestaurantRouters = [
   {
     path: "/",
-    element: <OwnerRestaurants />,
+    element: <MyRestaurants />,
+  },
+  {
+    path: "/add-restaurant",
+    element: <CreateRestaurant />,
   },
 ];
 
