@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useApolloClient, useMutation } from "@apollo/client";
 import { gql } from "../../__generated__/gql";
 import {
   CreateRestaurantMutation,
@@ -10,6 +10,7 @@ import {
 } from "../../__generated__/graphql";
 import FormError from "../../components/form-error";
 import Button from "../../components/button";
+import { MY_RESTAURANTS_QUERY } from "./owner-restaurants";
 
 const CREATE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
   mutation createRestaurant($input: CreateRestaurantInput!) {
@@ -29,11 +30,14 @@ interface ICreateRestaurantForm {
 }
 
 const CreateRestaurant = () => {
+  const client = useApolloClient();
   const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
+  const [coverImgUrl, setCoverImgUrl] = useState("");
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isValid },
   } = useForm<ICreateRestaurantForm>({
     mode: "onBlur",
@@ -46,15 +50,14 @@ const CreateRestaurant = () => {
       const actualFile = file[0];
       const formBody = new FormData();
       formBody.append("file", actualFile);
-
-      // graphQl mutation을 통해 file을 처리하지 못한다. 그래서 API post
+      // graphQl mutation을 통해 file을 처리하지 못한다. url 이 서로 다름.그래서 API post
       const { url: coverImg } = await (
         await fetch("http://localhost:4000/uploads/", {
           method: "POST",
           body: formBody,
         })
       ).json();
-
+      setCoverImgUrl(coverImg);
       createRestaurantMutation({
         variables: {
           input: {
@@ -65,7 +68,6 @@ const CreateRestaurant = () => {
           },
         },
       });
-
       setUploading(false);
     } catch (error) {
       console.log(error);
@@ -74,11 +76,43 @@ const CreateRestaurant = () => {
 
   const onCompleted = (data: CreateRestaurantMutation) => {
     const {
-      createRestaurant: { ok, restaurantId },
+      createRestaurant: { ok, error, restaurantId },
     } = data;
-    if (ok) {
+    if (ok && data) {
       setUploading(false);
-      navigate("/");
+      const { name, address, categoryName } = getValues();
+      // Link to 로 이동하면 cache 내용을 읽어올 수 있지만, url 을 손으로 쳐서 가면 null
+      const queryResult = client.readQuery({ query: MY_RESTAURANTS_QUERY });
+      console.log(queryResult);
+      if (queryResult !== null && queryResult !== undefined) {
+        client.writeQuery({
+          query: MY_RESTAURANTS_QUERY,
+          data: {
+            myRestaurants: {
+              ...queryResult?.myRestaurants,
+              ok,
+              error,
+              restaurants: [
+                ...queryResult?.myRestaurants.restaurants!,
+                {
+                  __typename: "Restaurant",
+                  id: restaurantId,
+                  name,
+                  coverImg: coverImgUrl,
+                  address,
+                  isPromoted: false,
+                  category: {
+                    __typename: "Category",
+                    name: categoryName,
+                    slug: categoryName.replace(/ /g, "-"),
+                  },
+                },
+              ],
+            },
+          },
+        });
+      }
+      navigate(`/restaurant/${restaurantId}`);
     }
   };
 

@@ -6,7 +6,7 @@ import { Helmet } from "react-helmet-async";
 import Restaurant from "../../components/restaurant";
 import { Link } from "react-router-dom";
 
-const MY_RESTAURANTS_QUERY = gql(/* GraphQL */ `
+export const MY_RESTAURANTS_QUERY = gql(/* GraphQL */ `
   query myRestaurants {
     myRestaurants {
       ok
@@ -39,9 +39,7 @@ const MyRestaurants = () => {
           <>
             <div className=" py-12 md:py-40 bg-cover bg-center bg-lime-600">
               <div className=" md:h-20 flex justify-around items-center">
-                <span className="text-xl md:text-3xl">
-                  나의 음식점 상세정보
-                </span>
+                <span className="text-xl md:text-3xl">나의 계정 상세정보</span>
               </div>
             </div>
             <div className=" flex flex-col justify-center items-center mt-10">
@@ -57,6 +55,9 @@ const MyRestaurants = () => {
           </>
         )}
       <div className="w-full px-5 xl:px-1 max-w-screen-xl mx-auto mt-5">
+        <div className=" md:h-20 flex justify-around items-center">
+          <span className="text-xl md:text-3xl">나의 계정 상세정보</span>
+        </div>
         <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7 mt-10">
           {data?.myRestaurants.restaurants?.map((restaurant) => (
             <Restaurant
