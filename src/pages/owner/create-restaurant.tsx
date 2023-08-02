@@ -141,7 +141,7 @@ const CreateRestaurant = () => {
             {...register("name", {
               required: "필수항목입니다.",
               minLength: 1,
-              maxLength: 15,
+              maxLength: 30,
             })}
             aria-invalid={errors.name ? true : false}
             name="name"
@@ -154,7 +154,7 @@ const CreateRestaurant = () => {
             <FormError errorMessage="1글자이상 입력하세요" />
           )}
           {errors.name?.type === "maxLength" && (
-            <FormError errorMessage="20글자이하로 입력하세요" />
+            <FormError errorMessage="30글자이하로 입력하세요" />
           )}
           <h4 className="text-sm text-gray-400 pl-3 mt-4">
             * 음식점의 대표이미지 파일을 선택해주세요.

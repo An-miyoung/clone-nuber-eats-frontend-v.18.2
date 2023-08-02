@@ -44,7 +44,7 @@ export const MY_RESTAURANT_QUERY = gql(/* GraphQL */ `
 `);
 
 const MyRestaurant = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { data } = useQuery<MyRestaurantQuery, MyRestaurantQueryVariables>(
     MY_RESTAURANT_QUERY,
     {
@@ -82,7 +82,7 @@ const MyRestaurant = () => {
         <div className="w-full px-3 md:px-5 xl:px-1 max-w-screen-xl mx-auto mt-5">
           <div className="flex justify-between md:justify-start">
             <Link
-              to={``}
+              to={`/restaurant/${id}/add-dish`}
               className=" mr-1 md:mr-8 text-white bg-gray-800 py-3 px-2 md:py-3 md:px-10"
             >
               메뉴 만들기
