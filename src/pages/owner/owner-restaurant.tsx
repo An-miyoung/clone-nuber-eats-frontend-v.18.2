@@ -7,6 +7,7 @@ import {
   MyRestaurantQuery,
   MyRestaurantQueryVariables,
 } from "../../__generated__/graphql";
+import Dish from "../../components/dish";
 
 export const MY_RESTAURANT_QUERY = gql(/* GraphQL */ `
   query myRestaurant($input: MyRestaurantInput!) {
@@ -94,14 +95,25 @@ const MyRestaurant = () => {
               to={`/edit-restaurant/${id}`}
               className=" mr-1 md:mr-8 text-gray-800 bg-gray-300 py-3 px-2 md:py-3 md:px-10"
             >
-              상세정보 수정
+              가게 정보수정
             </Link>
           </div>
-          <div className="mt-8 flex justify-center md:justify-start">
+          <div className=" mt-8 flex justify-center md:justify-start">
             {data?.myRestaurant.restaurant?.menu.length === 0 ? (
               <span>메뉴가 없습니다. 메뉴를 추가해 주세요.</span>
             ) : (
-              <div></div>
+              <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7">
+                {data?.myRestaurant.restaurant?.menu.map((dish) => (
+                  <Dish
+                    key={dish.id}
+                    id={dish.id}
+                    name={dish.name}
+                    price={dish.price}
+                    photo={dish.photo}
+                    description={dish.description}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
