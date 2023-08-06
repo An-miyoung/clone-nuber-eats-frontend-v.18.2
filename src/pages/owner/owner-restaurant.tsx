@@ -56,7 +56,25 @@ const MyRestaurant = () => {
       },
     }
   );
-  console.log(data);
+
+  const triggerPaddle = () => {
+    // @ts-ignore
+    window.Paddle.Setup({
+      vendor: 172762,
+    });
+    // @ts-ignore
+    window.Paddle.Checkout.open({
+      product: 837210,
+      eventCallback: function (data: any) {
+        // The data.event will specify the event type
+        if (data.event === "Checkout.Complete") {
+          console.log(data.eventData); // Data specifics on the event
+        } else if (data.event === "Checkout.Close") {
+          console.log(data.eventData); // Data specifics on the event
+        }
+      },
+    });
+  };
 
   return (
     <>
@@ -65,6 +83,7 @@ const MyRestaurant = () => {
           {data?.myRestaurant.restaurant?.name || "로딩중..."} 상세정보 | Nuber
           Eats
         </title>
+        <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
       </Helmet>
       <div>
         <div
@@ -73,11 +92,11 @@ const MyRestaurant = () => {
             backgroundImage: `url(${data?.myRestaurant.restaurant?.coverImg})`,
           }}
         >
-          <div className="w-2/4 py-2 pl-5 md:w-2/6 md:py-4 md:pl-28 bg-white ">
+          <div className="w-2/4 flex flex-col py-2 pl-5 md:w-2/6 md:py-4 md:pl-28 bg-white ">
             <span className="text-xl md:text-3xl">
               {data?.myRestaurant.restaurant?.name}{" "}
-              <span className="text-sm md:text-lg">상세정보</span>
             </span>
+            <span className="text-sm md:text-lg">상세정보</span>
           </div>
         </div>
         <div className="w-full px-3 md:px-5 xl:px-1 max-w-screen-xl mx-auto mt-5">
@@ -88,7 +107,10 @@ const MyRestaurant = () => {
             >
               메뉴 만들기
             </Link>
-            <span className="mr-1 md:mr-8 cursor-pointer text-white bg-lime-700 py-2 px-3 md:py-3 md:px-10">
+            <span
+              onClick={triggerPaddle}
+              className="mr-1 md:mr-8 cursor-pointer text-white bg-lime-700 py-2 px-3 md:py-3 md:px-10"
+            >
               프로모션 구매
             </span>
             <Link
