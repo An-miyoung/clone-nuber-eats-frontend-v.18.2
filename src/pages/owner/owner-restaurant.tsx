@@ -87,7 +87,7 @@ const MyRestaurant = () => {
       </Helmet>
       <div>
         <div
-          className=" bg-gray-700 py-10 md:py-20 bg-center bg-cover"
+          className=" bg-lime-400 py-10 md:py-20 bg-center bg-cover"
           style={{
             backgroundImage: `url(${data?.myRestaurant.restaurant?.coverImg})`,
           }}
@@ -126,14 +126,19 @@ const MyRestaurant = () => {
             ) : (
               <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7">
                 {data?.myRestaurant.restaurant?.menu.map((dish) => (
-                  <Dish
-                    key={dish.id}
-                    id={dish.id}
-                    name={dish.name}
-                    price={dish.price}
-                    photo={dish.photo}
-                    description={dish.description}
-                  />
+                  <div key={dish.id} className="relative">
+                    <div className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded">
+                      메뉴수정
+                    </div>
+                    <Dish
+                      key={dish.id}
+                      id={dish.id}
+                      name={dish.name}
+                      price={dish.price}
+                      photo={dish.photo}
+                      description={dish.description}
+                    />
+                  </div>
                 ))}
               </div>
             )}
