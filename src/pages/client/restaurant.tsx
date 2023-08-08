@@ -9,6 +9,7 @@ import {
 } from "../../__generated__/graphql";
 import { Helmet } from "react-helmet-async";
 import Dish from "../../components/dish";
+import DishOption from "../../components/dish-option";
 
 const RESTAURANT_QUERY = gql(/* GraphQL */ `
   query restaurant($input: RestaurantInput!) {
@@ -85,7 +86,6 @@ const Restaurant = () => {
   };
 
   const onClick = (dishId: number) => {
-    console.log(isSelected);
     if (orderStarted) {
       if (!isSelected(dishId)) {
         console.log(isSelected);
@@ -98,6 +98,8 @@ const Restaurant = () => {
       }
     }
   };
+  // react 에서 state 가 변하면 re-render 해주는 점을 이용하기 위해 초기세팅을 만든다.
+  // 이렇게 만들지 않고 addOptionToItem 내부에서 만들면서 옵션을 추가하면 한번씩 렌더가 밀린다.
   const addItemToOrder = (dishId: number) => {
     if (isSelected(dishId)) return;
     setOrderItems((prev) => [...prev, { dishId, options: [] }]);
@@ -114,6 +116,7 @@ const Restaurant = () => {
         oldItem.options?.find((aOption) => aOption.name === optionName)
       );
       if (!hasOptions) {
+        // 맨처음 만든 [dishId, option:[]] 를 삭제하기 위해서 removeItemToOrder
         removeItemToOrder(dishId);
         setOrderItems((prev) => [
           { dishId, options: [{ name: optionName }, ...oldItem.options!] },
@@ -122,6 +125,32 @@ const Restaurant = () => {
       }
     }
   };
+  const isOptionSelected = (dishId: number, optionName: string) => {
+    const item = getItems(dishId);
+    if (item) {
+      return Boolean(
+        item?.options?.find((option) => option.name === optionName)
+      );
+    }
+    return false;
+  };
+  const removeOptionFromItem = (dishId: number, optionName: string) => {
+    if (!isSelected(dishId)) return;
+    const oldItem = getItems(dishId);
+    if (oldItem) {
+      removeItemToOrder(dishId);
+      setOrderItems((prev) => [
+        {
+          dishId,
+          options: oldItem.options?.filter(
+            (option) => option.name !== optionName
+          ),
+        },
+        ...prev,
+      ]);
+    }
+  };
+
   console.log(orderItems);
 
   return (
@@ -174,38 +203,21 @@ const Restaurant = () => {
                 photo={dish.photo}
                 description={dish.description}
                 isCustomer={true}
+                isSelected={isSelected(dish.id)}
                 orderStarted={orderStarted}
                 options={dish.options}
-                // addItemToOrder={addItemToOrder}
-                // removeItemToOrder={removeItemToOrder}
-                // addOptionToItem={addOptionToItem}
               >
                 {showOption &&
                   dish.options?.map((option, idx) => (
-                    <div
+                    <DishOption
                       key={idx}
-                      className="flex items-center justify-between text-gray-700"
-                    >
-                      <h6 className="mt-2">
-                        - {option.name} (
-                        {`${option.extraPrice!.toLocaleString()}`}
-                        원)
-                      </h6>
-                      <div className="  flex items-center mt-2">
-                        <button
-                          onClick={() => addOptionToItem(dish.id, option.name)}
-                          className="py-1 px-3 mr-5 cursor-pointer  text-lime-800 "
-                        >
-                          + 추가
-                        </button>
-                        <button
-                          onClick={() => addOptionToItem(dish.id, option.name)}
-                          className="py-1 px-3 mr-5 cursor-pointer  text-red-800"
-                        >
-                          - 삭제
-                        </button>
-                      </div>
-                    </div>
+                      dishId={dish.id}
+                      name={option.name}
+                      extraPrice={option.extraPrice}
+                      isSelected={isOptionSelected(dish.id, option.name)}
+                      addOptionToItem={addOptionToItem}
+                      removeOptionFromItem={removeOptionFromItem}
+                    />
                   ))}
               </Dish>
             </div>
