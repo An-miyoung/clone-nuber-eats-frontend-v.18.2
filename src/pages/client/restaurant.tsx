@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { gql } from "../../__generated__/gql";
 import { useQuery } from "@apollo/client";
 import {
+  CreateOrderItemInput,
   RestaurantQuery,
   RestaurantQueryVariables,
 } from "../../__generated__/graphql";
@@ -44,8 +45,21 @@ const RESTAURANT_QUERY = gql(/* GraphQL */ `
   }
 `);
 
+const CREATE_ORDER_MUTATION = gql(/* GraphQL */ `
+  mutation createOrder($input: CreateOrderInput!) {
+    createOrder(input: $input) {
+      ok
+      error
+      orderId
+    }
+  }
+`);
+
 const Restaurant = () => {
   const params = useParams();
+  const [orderStarted, setOrderStarted] = useState(false);
+  const [orderItems, setOrderItems] = useState<CreateOrderItemInput[]>([]);
+  const [showOption, setShowOption] = useState(false);
 
   const { loading, data } = useQuery<RestaurantQuery, RestaurantQueryVariables>(
     RESTAURANT_QUERY,
@@ -57,6 +71,58 @@ const Restaurant = () => {
       },
     }
   );
+
+  const triggerStartOrder = () => {
+    setOrderStarted(true);
+  };
+
+  const getItems = (dishId: number) => {
+    return orderItems.find((order) => order.dishId === dishId);
+  };
+
+  const isSelected = (dishId: number) => {
+    return Boolean(orderItems.find((order) => order.dishId === dishId));
+  };
+
+  const onClick = (dishId: number) => {
+    console.log(isSelected);
+    if (orderStarted) {
+      if (!isSelected(dishId)) {
+        console.log(isSelected);
+        setShowOption(true);
+        return addItemToOrder(dishId);
+      }
+      if (isSelected(dishId) && removeItemToOrder) {
+        setShowOption(false);
+        return removeItemToOrder(dishId);
+      }
+    }
+  };
+  const addItemToOrder = (dishId: number) => {
+    if (isSelected(dishId)) return;
+    setOrderItems((prev) => [...prev, { dishId, options: [] }]);
+  };
+  const removeItemToOrder = (dishId: number) => {
+    setOrderItems((prev) => prev.filter((order) => order.dishId !== dishId));
+  };
+  const addOptionToItem = (dishId: number, optionName: string) => {
+    if (!isSelected(dishId)) return;
+    const oldItem = getItems(dishId);
+    if (oldItem) {
+      // 똑같은 옵션을 중복하지 않도록 체크
+      const hasOptions = Boolean(
+        oldItem.options?.find((aOption) => aOption.name === optionName)
+      );
+      if (!hasOptions) {
+        removeItemToOrder(dishId);
+        setOrderItems((prev) => [
+          { dishId, options: [{ name: optionName }, ...oldItem.options!] },
+          ...prev,
+        ]);
+      }
+    }
+  };
+  console.log(orderItems);
 
   return (
     <div>
@@ -83,13 +149,24 @@ const Restaurant = () => {
           </h6>
         </div>
       </div>
-      <div className="w-full px-3 md:px-5 xl:px-1 max-w-screen-xl mx-auto mt-7 md:mt-10">
-        <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7">
+      <div className="flex flex-col px-3 mb-20 md:px-5 xl:px-1 max-w-screen-xl mx-auto mt-7 md:mt-10 md:items-end">
+        <button
+          onClick={triggerStartOrder}
+          className="btn px-3 lg:px-10 bg-lime-900 mb-5"
+        >
+          {orderStarted ? "주문 진행중..." : "클릭하면 주문시작!"}
+        </button>
+        <div className="w-full grid lg:grid-cols-3 gap-x-4 gap-y-7">
           {data?.restaurant.restaurant?.menu.map((dish) => (
             <div key={dish.id} className="relative">
-              <div className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded">
-                구매하기
-              </div>
+              {orderStarted && (
+                <div
+                  onClick={() => onClick(dish.id)}
+                  className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded"
+                >
+                  주문해볼까?
+                </div>
+              )}
               <Dish
                 id={dish.id}
                 name={dish.name}
@@ -97,8 +174,40 @@ const Restaurant = () => {
                 photo={dish.photo}
                 description={dish.description}
                 isCustomer={true}
+                orderStarted={orderStarted}
                 options={dish.options}
-              />
+                // addItemToOrder={addItemToOrder}
+                // removeItemToOrder={removeItemToOrder}
+                // addOptionToItem={addOptionToItem}
+              >
+                {showOption &&
+                  dish.options?.map((option, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between text-gray-700"
+                    >
+                      <h6 className="mt-2">
+                        - {option.name} (
+                        {`${option.extraPrice!.toLocaleString()}`}
+                        원)
+                      </h6>
+                      <div className="  flex items-center mt-2">
+                        <button
+                          onClick={() => addOptionToItem(dish.id, option.name)}
+                          className="py-1 px-3 mr-5 cursor-pointer  text-lime-800 "
+                        >
+                          + 추가
+                        </button>
+                        <button
+                          onClick={() => addOptionToItem(dish.id, option.name)}
+                          className="py-1 px-3 mr-5 cursor-pointer  text-red-800"
+                        >
+                          - 삭제
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </Dish>
             </div>
           ))}
         </div>
