@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { gql } from "../../__generated__/gql";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   CreateOrderItemInput,
+  CreateOrderMutation,
+  CreateOrderMutationVariables,
   RestaurantQuery,
   RestaurantQueryVariables,
 } from "../../__generated__/graphql";
@@ -62,7 +64,7 @@ const Restaurant = () => {
   const [orderItems, setOrderItems] = useState<CreateOrderItemInput[]>([]);
   const [showOption, setShowOption] = useState(false);
 
-  const { loading, data } = useQuery<RestaurantQuery, RestaurantQueryVariables>(
+  const { data } = useQuery<RestaurantQuery, RestaurantQueryVariables>(
     RESTAURANT_QUERY,
     {
       variables: {
@@ -73,8 +75,57 @@ const Restaurant = () => {
     }
   );
 
+  const onCompleted = (data: CreateOrderMutation) => {
+    const {
+      createOrder: { ok, orderId },
+    } = data;
+    if (ok) {
+      window.alert("주문이 생성됐습니다.");
+      console.log(orderId);
+    }
+  };
+
+  const [
+    createOrderMutation,
+    { loading: placingOrder, data: createOrderMutationResult },
+  ] = useMutation<CreateOrderMutation, CreateOrderMutationVariables>(
+    CREATE_ORDER_MUTATION,
+    {
+      onCompleted,
+    }
+  );
+
   const triggerStartOrder = () => {
     setOrderStarted(true);
+  };
+
+  const triggerConFirmOrder = () => {
+    if (orderItems.length === 0) {
+      window.alert("주문내역이 없습니다.");
+      return;
+    }
+    // Todo: 주문내역을 고객이 볼 수 있도록 만들것
+    const result = orderItems.map((order) =>
+      data?.restaurant.restaurant?.menu.find((menu) => menu.id === order.dishId)
+    );
+    console.log(result);
+
+    const ok = window.confirm("주문을 확정하고 결제를 합니다.");
+    if (ok) {
+      createOrderMutation({
+        variables: {
+          input: {
+            restaurantId: +params.id!,
+            items: orderItems,
+          },
+        },
+      });
+    }
+  };
+
+  const triggerCancelOrder = () => {
+    setOrderStarted(false);
+    setOrderItems([]);
   };
 
   const getItems = (dishId: number) => {
@@ -179,12 +230,30 @@ const Restaurant = () => {
         </div>
       </div>
       <div className="flex flex-col px-3 mb-20 md:px-5 xl:px-1 max-w-screen-xl mx-auto mt-7 md:mt-10 md:items-end">
-        <button
-          onClick={triggerStartOrder}
-          className="btn px-3 lg:px-10 bg-lime-900 mb-5"
-        >
-          {orderStarted ? "주문 진행중..." : "클릭하면 주문시작!"}
-        </button>
+        {!orderStarted && (
+          <button
+            onClick={triggerStartOrder}
+            className="btn py-2 px-3 lg:px-10 bg-lime-900 mb-5"
+          >
+            클릭하면 주문시작!
+          </button>
+        )}
+        {orderStarted && (
+          <div className="flex justify-end">
+            <button
+              onClick={triggerConFirmOrder}
+              className="btn py-2 px-3 lg:px-10 bg-lime-900 mb-5 mr-5"
+            >
+              주문확정
+            </button>
+            <button
+              onClick={triggerCancelOrder}
+              className="btn py-2 px-3 lg:px-10 bg-red-500 mb-5 transition-colors hover:bg-red-400"
+            >
+              주문취소
+            </button>
+          </div>
+        )}
         <div className="w-full grid lg:grid-cols-3 gap-x-4 gap-y-7">
           {data?.restaurant.restaurant?.menu.map((dish) => (
             <div key={dish.id} className="relative">
@@ -193,7 +262,7 @@ const Restaurant = () => {
                   onClick={() => onClick(dish.id)}
                   className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded"
                 >
-                  주문해볼까?
+                  먼저, 눌러서 선택
                 </div>
               )}
               <Dish
