@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { gql } from "../../__generated__/gql";
 import { useMutation, useQuery } from "@apollo/client";
 import {
@@ -60,6 +60,7 @@ const CREATE_ORDER_MUTATION = gql(/* GraphQL */ `
 
 const Restaurant = () => {
   const params = useParams();
+  const navigate = useNavigate();
   const [orderStarted, setOrderStarted] = useState(false);
   const [orderItems, setOrderItems] = useState<CreateOrderItemInput[]>([]);
   const [showOption, setShowOption] = useState(false);
@@ -80,26 +81,24 @@ const Restaurant = () => {
       createOrder: { ok, orderId },
     } = data;
     if (ok) {
-      window.alert("주문이 생성됐습니다.");
-      console.log(orderId);
+      navigate(`/orders/${orderId}`);
     }
   };
 
-  const [
-    createOrderMutation,
-    { loading: placingOrder, data: createOrderMutationResult },
-  ] = useMutation<CreateOrderMutation, CreateOrderMutationVariables>(
-    CREATE_ORDER_MUTATION,
-    {
-      onCompleted,
-    }
-  );
+  const [createOrderMutation, { loading: placingOrder }] = useMutation<
+    CreateOrderMutation,
+    CreateOrderMutationVariables
+  >(CREATE_ORDER_MUTATION, {
+    onCompleted,
+  });
 
   const triggerStartOrder = () => {
     setOrderStarted(true);
   };
 
   const triggerConFirmOrder = () => {
+    // 주문이 중복되어 들어가는 것을 막기 위해 현재 create 중이면 다시 만들지 못하게 막음
+    if (placingOrder) return;
     if (orderItems.length === 0) {
       window.alert("주문내역이 없습니다.");
       return;

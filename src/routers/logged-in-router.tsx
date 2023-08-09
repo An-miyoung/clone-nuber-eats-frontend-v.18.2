@@ -15,6 +15,7 @@ import CreateRestaurant from "../pages/owner/create-restaurant";
 import MyRestaurant from "../pages/owner/owner-restaurant";
 import AddDish from "../pages/owner/add-dish";
 import EditRestaurant from "../pages/owner/edit-restaurant";
+import Order from "../pages/order";
 
 const CommonRouters = [
   {
@@ -24,6 +25,10 @@ const CommonRouters = [
   {
     path: "/edit-profile",
     element: <EditProfile />,
+  },
+  {
+    path: "/orders/:id",
+    element: <Order />,
   },
 ];
 
