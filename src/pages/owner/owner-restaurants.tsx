@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { gql } from "../../__generated__/gql";
-import { useQuery } from "@apollo/client";
-import { MyRestaurantsQuery } from "../../__generated__/graphql";
+import { useQuery, useSubscription } from "@apollo/client";
+import {
+  MyRestaurantsQuery,
+  PendingOrdersSubscription,
+} from "../../__generated__/graphql";
 import { Helmet } from "react-helmet-async";
 import Restaurant from "../../components/restaurant";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { PENDING_ORDERS_SUBSCRIPTION } from "./owner-restaurant";
 
 export const MY_RESTAURANTS_QUERY = gql(/* GraphQL */ `
   query myRestaurants {
@@ -28,7 +32,17 @@ export const MY_RESTAURANTS_QUERY = gql(/* GraphQL */ `
 
 const MyRestaurants = () => {
   const { data } = useQuery<MyRestaurantsQuery>(MY_RESTAURANTS_QUERY);
+  const navigate = useNavigate();
   console.log(data);
+  const { data: subscriptionData } = useSubscription<PendingOrdersSubscription>(
+    PENDING_ORDERS_SUBSCRIPTION
+  );
+  console.log(subscriptionData);
+  useEffect(() => {
+    if (subscriptionData?.pendingOrders.id) {
+      navigate(`/orders/${subscriptionData.pendingOrders.id}`);
+    }
+  }, [navigate, subscriptionData]);
   return (
     <>
       <Helmet>

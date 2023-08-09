@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { gql } from "../../__generated__/gql";
-import { useQuery } from "@apollo/client";
+import { useQuery, useSubscription } from "@apollo/client";
 import {
   MyRestaurantQuery,
   MyRestaurantQueryVariables,
+  PendingOrdersSubscription,
 } from "../../__generated__/graphql";
 import Dish from "../../components/dish";
 
@@ -44,8 +45,28 @@ export const MY_RESTAURANT_QUERY = gql(/* GraphQL */ `
   }
 `);
 
+export const PENDING_ORDERS_SUBSCRIPTION = gql(/* GraphQL */ `
+  subscription pendingOrders {
+    pendingOrders {
+      id
+      customer {
+        email
+      }
+      driver {
+        email
+      }
+      restaurant {
+        name
+      }
+      totalPrice
+      status
+    }
+  }
+`);
+
 const MyRestaurant = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data } = useQuery<MyRestaurantQuery, MyRestaurantQueryVariables>(
     MY_RESTAURANT_QUERY,
     {
@@ -56,6 +77,10 @@ const MyRestaurant = () => {
       },
     }
   );
+  const { data: subscriptionData } = useSubscription<PendingOrdersSubscription>(
+    PENDING_ORDERS_SUBSCRIPTION
+  );
+  console.log(subscriptionData);
 
   const triggerPaddle = () => {
     // @ts-ignore
@@ -76,6 +101,11 @@ const MyRestaurant = () => {
     });
   };
 
+  useEffect(() => {
+    if (subscriptionData?.pendingOrders.id) {
+      navigate(`/orders/${subscriptionData.pendingOrders.id}`);
+    }
+  }, [navigate, subscriptionData]);
   return (
     <>
       <Helmet>
