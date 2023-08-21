@@ -2,8 +2,10 @@ import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { gql } from "../__generated__/gql";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
+  EditOrderMutation,
+  EditOrderMutationVariables,
   GetOrderQuery,
   GetOrderQueryVariables,
   OrderStatus,
@@ -53,6 +55,15 @@ const ORDER_SUBSCRIPTION = gql(/* GraphQL */ `
   }
 `);
 
+const EDIT_ORDER_MUTATION = gql(/* GraphQL */ `
+  mutation editOrder($input: EditOrderInput!) {
+    editOrder(input: $input) {
+      ok
+      error
+    }
+  }
+`);
+
 const changeStatusToKorean = (status: OrderStatus) => {
   switch (status) {
     case OrderStatus.Cooked:
@@ -84,7 +95,6 @@ const Order = () => {
       },
     },
   });
-
   // useQuery 에서 제공하는 subscribeToMore 를 사용하면 useSubscription 을 쓰지않아도 된다.
   // const { data: subscriptionData } = useSubscription<
   //   OrderUpdatesSubscription,
@@ -97,7 +107,21 @@ const Order = () => {
   //   },
   // });
 
-  console.log(data);
+  const [editOrderMutation] = useMutation<
+    EditOrderMutation,
+    EditOrderMutationVariables
+  >(EDIT_ORDER_MUTATION);
+
+  const onButtonClick = (newStatus: OrderStatus) => {
+    editOrderMutation({
+      variables: {
+        input: {
+          id: +params.id!,
+          status: newStatus,
+        },
+      },
+    });
+  };
 
   useEffect(() => {
     if (data?.getOrder.ok && params.id) {
@@ -168,11 +192,31 @@ const Order = () => {
           {userData?.me.role === UserRole.Owner && (
             <>
               {data?.getOrder.order?.status === OrderStatus.Pending && (
-                <button>주문접수</button>
+                <button
+                  onClick={() => onButtonClick(OrderStatus.Cooking)}
+                  className="btn bg-lime-600 text-white"
+                >
+                  주문접수
+                </button>
               )}
               {data?.getOrder.order?.status === OrderStatus.Cooking && (
-                <button>조리완료</button>
+                <button
+                  onClick={() => onButtonClick(OrderStatus.Cooked)}
+                  className="btn  bg-lime-600 text-white"
+                >
+                  조리완료
+                </button>
               )}
+              {data?.getOrder.order?.status !== OrderStatus.Cooking &&
+                data?.getOrder.order?.status !== OrderStatus.Pending && (
+                  <div className="border-t px-5 py-10 md:px-32 text-center border-gray-700 text-lime-600 ">
+                    현재,{" "}
+                    <span className="font-medium text-lime-600">
+                      {data?.getOrder.order?.status &&
+                        changeStatusToKorean(data?.getOrder.order?.status)}
+                    </span>
+                  </div>
+                )}
             </>
           )}
 
