@@ -37,6 +37,36 @@ const Dashboard = () => {
     setMaps(maps);
   };
 
+  const getRouteClick = () => {
+    if (!map) return;
+    const directionService = new google.maps.DirectionsService();
+    const directionRenderer = new google.maps.DirectionsRenderer({
+      polylineOptions: {
+        strokeColor: "#000",
+        strokeOpacity: 0.7,
+        strokeWeight: 3,
+      },
+    });
+    directionRenderer.setMap(map);
+    directionService.route(
+      {
+        origin: {
+          location: new google.maps.LatLng(driverCoords.lat, driverCoords.lng),
+        },
+        destination: {
+          location: new google.maps.LatLng(
+            driverCoords.lat + 0.05,
+            driverCoords.lng + 0.05
+          ),
+        },
+        travelMode: google.maps.TravelMode.TRANSIT,
+      },
+      (result) => {
+        directionRenderer.setDirections(result);
+      }
+    );
+  };
+
   useEffect(() => {
     // 브라우저가 제공하는 기본기능. 사용자의 현재위치를 찾아낸다.
     navigator.geolocation.watchPosition(onSuccess, onError, {
@@ -48,6 +78,16 @@ const Dashboard = () => {
     //  매번 화면을 refresh 하지 않아도 driverCoords 가 변하면 map 도 같은 좌표를 같도록
     if (map && maps) {
       map.panTo(new google.maps.LatLng(driverCoords.lat, driverCoords.lng));
+      // driver 의 lat, lng 를 받으면 실제 주소로 변환해주는 method를 부른다
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode(
+        {
+          location: new google.maps.LatLng(driverCoords.lat, driverCoords.lng),
+        },
+        (result, status) => {
+          console.log(status, result);
+        }
+      );
     }
   }, [driverCoords.lat, driverCoords.lng, map, maps]);
 
@@ -70,6 +110,7 @@ const Dashboard = () => {
           <div className="text-2xl">🚖</div>
         </GoogleMapReact>
       </div>
+      <button onClick={getRouteClick}>경로보기</button>
     </div>
   );
 };
