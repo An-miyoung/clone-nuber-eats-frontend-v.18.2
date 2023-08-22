@@ -1,5 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 import GoogleMapReact from "google-map-react";
+import { useMutation, useSubscription } from "@apollo/client";
+import { gql } from "../../__generated__/gql";
+import {
+  CookedOrdersSubscription,
+  TakeOrderMutation,
+  TakeOrderMutationVariables,
+} from "../../__generated__/graphql";
+
+const COOKED_ORDERS_SUBSCRIPTION = gql(/* GraphQL */ `
+  subscription cookedOrders {
+    cookedOrders {
+      id
+      customer {
+        email
+      }
+      driver {
+        email
+      }
+      restaurant {
+        name
+      }
+      totalPrice
+      status
+    }
+  }
+`);
+
+const TAKE_ORDER_MUTATION = gql(/* GraphQL */ `
+  mutation takeOrder($input: TakeOrderInput!) {
+    takeOrder(input: $input) {
+      ok
+      error
+    }
+  }
+`);
 
 interface ICoords {
   lat: number;
@@ -15,9 +52,36 @@ const defaultProps = {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [driverCoords, setDriverCoords] = useState<ICoords>({ lat: 0, lng: 0 });
   const [map, setMap] = useState<google.maps.Map>();
   const [maps, setMaps] = useState<GoogleMapReact>();
+
+  const { data: cookedOrdersData } = useSubscription<CookedOrdersSubscription>(
+    COOKED_ORDERS_SUBSCRIPTION
+  );
+
+  const onCompleted = (data: TakeOrderMutation) => {
+    if (data.takeOrder.ok && cookedOrdersData?.cookedOrders.id) {
+      navigate(`/orders/${cookedOrdersData.cookedOrders.id}`);
+    }
+  };
+  const [takeOrderMutation] = useMutation<
+    TakeOrderMutation,
+    TakeOrderMutationVariables
+  >(TAKE_ORDER_MUTATION, {
+    onCompleted,
+  });
+
+  const triggerMutation = () => {
+    takeOrderMutation({
+      variables: {
+        input: {
+          id: +cookedOrdersData?.cookedOrders.id!,
+        },
+      },
+    });
+  };
 
   // navigator.geolocation.watchPosition 을 통해 알아낸 현재 위치
   const onSuccess = (position: GeolocationPosition) => {
@@ -37,7 +101,7 @@ const Dashboard = () => {
     setMaps(maps);
   };
 
-  const getRouteClick = () => {
+  const makeRoute = useCallback(() => {
     if (!map) return;
     const directionService = new google.maps.DirectionsService();
     const directionRenderer = new google.maps.DirectionsRenderer({
@@ -65,7 +129,13 @@ const Dashboard = () => {
         directionRenderer.setDirections(result);
       }
     );
-  };
+  }, [driverCoords.lat, driverCoords.lng, map]);
+
+  useEffect(() => {
+    if (cookedOrdersData?.cookedOrders.id) {
+      makeRoute();
+    }
+  }, [cookedOrdersData, makeRoute]);
 
   useEffect(() => {
     // 브라우저가 제공하는 기본기능. 사용자의 현재위치를 찾아낸다.
@@ -85,7 +155,7 @@ const Dashboard = () => {
           location: new google.maps.LatLng(driverCoords.lat, driverCoords.lng),
         },
         (result, status) => {
-          console.log(status, result);
+          // console.log(status, result);
         }
       );
     }
@@ -93,6 +163,9 @@ const Dashboard = () => {
 
   return (
     <div>
+      <Helmet>
+        <title> 배달기사님 대쉬보드 | Nuber Eats</title>
+      </Helmet>
       <div
         className="bg-lime-500 overflow-hidden"
         style={{ height: "50vh", width: window.innerWidth }}
@@ -110,7 +183,28 @@ const Dashboard = () => {
           <div className="text-2xl">🚖</div>
         </GoogleMapReact>
       </div>
-      <button onClick={getRouteClick}>경로보기</button>
+      <div className=" max-w-screen-sm mx-auto bg-white relative -top-10 shadow-lg py-8 px-5">
+        {cookedOrdersData?.cookedOrders.restaurant ? (
+          <>
+            <h1 className=" text-center text-2xl font-medium">
+              새로운 배달요청
+            </h1>
+            <h4 className=" text-center text-xl font-medium mt-2">
+              빨리 수락하세요 @ {cookedOrdersData.cookedOrders.restaurant?.name}
+            </h4>
+            <button
+              onClick={triggerMutation}
+              className="btn w-full bg-lime-600 mt-4 text-xl font-medium"
+            >
+              수락 &rarr;
+            </button>
+          </>
+        ) : (
+          <h1 className=" text-center text-2xl font-medium">
+            새로운 배달요청이 없습니다.
+          </h1>
+        )}
+      </div>
     </div>
   );
 };

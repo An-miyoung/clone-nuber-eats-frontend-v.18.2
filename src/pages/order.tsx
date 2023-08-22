@@ -186,6 +186,11 @@ const Order = () => {
                 {data?.getOrder.order?.status &&
                   changeStatusToKorean(data?.getOrder.order?.status)}
               </span>
+              {data?.getOrder.order?.status === OrderStatus.Delivered && (
+                <div className=" text-center mt-2 text-xl text-lime-600">
+                  Nuber Eats를 이용해 주셔서 감사합니다.
+                </div>
+              )}
             </div>
           )}
           {/* 점주 render part */}
@@ -209,27 +214,53 @@ const Order = () => {
               )}
               {data?.getOrder.order?.status !== OrderStatus.Cooking &&
                 data?.getOrder.order?.status !== OrderStatus.Pending && (
-                  <div className="border-t px-5 py-10 md:px-32 text-center border-gray-700 text-lime-600 ">
+                  <div className="border-t px-5 py-10 md:px-32  text-center border-gray-700 text-lime-600 ">
                     현재,{" "}
                     <span className="font-medium text-lime-600">
                       {data?.getOrder.order?.status &&
                         changeStatusToKorean(data?.getOrder.order?.status)}
                     </span>
+                    {data?.getOrder.order?.status === OrderStatus.Delivered && (
+                      <div className=" text-center mt-2  text-xl text-lime-600">
+                        Nuber Eats를 이용해 주셔서 감사합니다.
+                      </div>
+                    )}
                   </div>
                 )}
             </>
           )}
-
-          {/* {data?.getOrder.order?.status === OrderStatus.Delivered && (
+          {/* 드라이버 render part */}
+          {userData?.me.role === UserRole.Delivery && (
             <>
-              <span className=" text-center mt-2 text-xl text-lime-600">
-                배달이 완료됐습니다.
-              </span>
-              <span className=" text-center  mb-5  text-xl text-lime-600">
-                Nuber Eats를 이용해 주셔서 감사합니다.
-              </span>
+              {data?.getOrder.order?.status === OrderStatus.Cooked && (
+                <button
+                  onClick={() => onButtonClick(OrderStatus.PickedUp)}
+                  className="btn bg-lime-600 text-white"
+                >
+                  배달시작
+                </button>
+              )}
+              {data?.getOrder.order?.status === OrderStatus.PickedUp && (
+                <button
+                  onClick={() => onButtonClick(OrderStatus.Delivered)}
+                  className="btn bg-lime-600 text-white"
+                >
+                  배달완료
+                </button>
+              )}
+              {data?.getOrder.order?.status === OrderStatus.Delivered && (
+                <>
+                  <span className=" text-center mt-2 text-xl text-lime-600">
+                    배달이 완료됐습니다.
+                  </span>
+
+                  <span className=" text-center  mb-5  text-xl text-lime-600">
+                    Nuber Eats를 이용해 주셔서 감사합니다.
+                  </span>
+                </>
+              )}
             </>
-          )} */}
+          )}
         </div>
       </div>
     </div>
