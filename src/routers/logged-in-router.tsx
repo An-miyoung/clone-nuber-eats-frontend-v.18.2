@@ -16,6 +16,7 @@ import MyRestaurant from "../pages/owner/owner-restaurant";
 import AddDish from "../pages/owner/add-dish";
 import EditRestaurant from "../pages/owner/edit-restaurant";
 import Order from "../pages/order";
+import Dashboard from "../pages/driver/dashboard";
 
 const CommonRouters = [
   {
@@ -74,6 +75,13 @@ const RestaurantRouters = [
   },
 ];
 
+const DriverRouters = [
+  {
+    path: "/",
+    element: <Dashboard />,
+  },
+];
+
 const LoggedInRouter = () => {
   const { data, loading, error } = useMe();
 
@@ -98,6 +106,10 @@ const LoggedInRouter = () => {
           ))}
         {data.me.role === UserRole.Owner &&
           RestaurantRouters.map((router, idx) => (
+            <Route path={router.path} element={router.element} key={idx} />
+          ))}
+        {data.me.role === UserRole.Delivery &&
+          DriverRouters.map((router, idx) => (
             <Route path={router.path} element={router.element} key={idx} />
           ))}
         {CommonRouters.map((router, idx) => (

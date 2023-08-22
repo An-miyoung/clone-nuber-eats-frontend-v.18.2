@@ -16,6 +16,7 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.0.2",
+    "google-map-react": "^2.2.1",
     "graphql": "^16.7.1",
     "postcss": "^8.1.9",
     "react": "^18.2.0",
@@ -58,6 +59,8 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^4.0.1",
     "@graphql-codegen/client-preset": "^4.0.1",
+    "@types/google-map-react": "^2.1.7",
+    "@types/googlemaps": "^3.43.3",
     "ts-node": "^10.9.1"
   }
 }
