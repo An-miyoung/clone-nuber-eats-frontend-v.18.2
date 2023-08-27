@@ -28,6 +28,7 @@ const documents = {
     "\n  mutation editOrder($input: EditOrderInput!) {\n    editOrder(input: $input) {\n      ok\n      error\n    }\n  }\n": types.EditOrderDocument,
     "\n  mutation createDish($input: CreateDishInput!) {\n    createDish(input: $input) {\n      ok\n      error\n    }\n  }\n": types.CreateDishDocument,
     "\n  mutation createRestaurant($input: CreateRestaurantInput!) {\n    createRestaurant(input: $input) {\n      ok\n      error\n      restaurantId\n    }\n  }\n": types.CreateRestaurantDocument,
+    "\n  mutation deleteRestaurant($input: DeleteRestaurantInput!) {\n    deleteRestaurant(input: $input) {\n      ok\n      error\n    }\n  }\n": types.DeleteRestaurantDocument,
     "\n  query myRestaurant($input: MyRestaurantInput!) {\n    myRestaurant(input: $input) {\n      ok\n      error\n      restaurant {\n        id\n        name\n        coverImg\n        category {\n          name\n          slug\n        }\n        address\n        isPromoted\n        menu {\n          id\n          name\n          price\n          photo\n          description\n          options {\n            name\n            extraPrice\n            choices {\n              name\n              extraPrice\n            }\n          }\n        }\n      }\n    }\n  }\n": types.MyRestaurantDocument,
     "\n  subscription pendingOrders {\n    pendingOrders {\n      id\n      customer {\n        email\n      }\n      driver {\n        email\n      }\n      restaurant {\n        name\n      }\n      totalPrice\n      status\n    }\n  }\n": types.PendingOrdersDocument,
     "\n  query myRestaurants {\n    myRestaurants {\n      ok\n      error\n      restaurants {\n        id\n        name\n        coverImg\n        category {\n          name\n          slug\n        }\n        address\n        isPromoted\n      }\n    }\n  }\n": types.MyRestaurantsDocument,
@@ -111,6 +112,10 @@ export function gql(source: "\n  mutation createDish($input: CreateDishInput!) {
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation createRestaurant($input: CreateRestaurantInput!) {\n    createRestaurant(input: $input) {\n      ok\n      error\n      restaurantId\n    }\n  }\n"): (typeof documents)["\n  mutation createRestaurant($input: CreateRestaurantInput!) {\n    createRestaurant(input: $input) {\n      ok\n      error\n      restaurantId\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation deleteRestaurant($input: DeleteRestaurantInput!) {\n    deleteRestaurant(input: $input) {\n      ok\n      error\n    }\n  }\n"): (typeof documents)["\n  mutation deleteRestaurant($input: DeleteRestaurantInput!) {\n    deleteRestaurant(input: $input) {\n      ok\n      error\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
