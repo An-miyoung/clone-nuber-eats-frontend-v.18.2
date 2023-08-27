@@ -83,7 +83,6 @@ const CreateRestaurant = () => {
       const { name, address, categoryName } = getValues();
       // Link to 로 이동하면 cache 내용을 읽어올 수 있지만, url 을 손으로 쳐서 가면 null
       const queryResult = client.readQuery({ query: MY_RESTAURANTS_QUERY });
-      console.log(queryResult);
       if (queryResult !== null && queryResult !== undefined) {
         client.writeQuery({
           query: MY_RESTAURANTS_QUERY,

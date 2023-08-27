@@ -10,11 +10,12 @@ import {
   MyRestaurantQuery,
   MyRestaurantQueryVariables,
 } from "../../__generated__/graphql";
-import { MY_RESTAURANT_QUERY } from "./owner-restaurant";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import FormError from "../../components/form-error";
 import Button from "../../components/button";
+import { MY_RESTAURANT_QUERY } from "./owner-restaurant";
+import { MY_RESTAURANTS_QUERY } from "./owner-restaurants";
 
 const DELETE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
   mutation deleteRestaurant($input: DeleteRestaurantInput!) {
@@ -49,7 +50,6 @@ const EditRestaurant = () => {
       },
     }
   );
-  console.log(data);
 
   const [editRestaurantMutation, { data: editRestaurantResult }] = useMutation<
     EditRestaurantMutation,
@@ -64,6 +64,7 @@ const EditRestaurant = () => {
         navigate(`/restaurant/${id}`);
       }
     },
+    refetchQueries: [{ query: MY_RESTAURANTS_QUERY }],
   });
 
   const [deleteRestaurantMutation, { data: deleteRstaurantResult }] =
@@ -79,6 +80,7 @@ const EditRestaurant = () => {
             navigate("/");
           }
         },
+        refetchQueries: [{ query: MY_RESTAURANTS_QUERY }],
       }
     );
 
@@ -101,7 +103,6 @@ const EditRestaurant = () => {
     try {
       setUploading(true);
       const { name, categoryName, address, file } = getValues();
-      console.log(file);
       if (!file) {
         const coverImg = data?.myRestaurant.restaurant?.coverImg;
         editRestaurantMutation({
@@ -126,7 +127,6 @@ const EditRestaurant = () => {
             body: formBody,
           })
         ).json();
-        console.log("새파일:", coverImg);
         editRestaurantMutation({
           variables: {
             input: {
@@ -139,7 +139,6 @@ const EditRestaurant = () => {
           },
         });
       }
-
       setUploading(false);
     } catch (error) {
       console.log(error);

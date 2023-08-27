@@ -33,11 +33,9 @@ export const MY_RESTAURANTS_QUERY = gql(/* GraphQL */ `
 const MyRestaurants = () => {
   const { data } = useQuery<MyRestaurantsQuery>(MY_RESTAURANTS_QUERY);
   const navigate = useNavigate();
-  console.log(data);
   const { data: subscriptionData } = useSubscription<PendingOrdersSubscription>(
     PENDING_ORDERS_SUBSCRIPTION
   );
-  console.log(subscriptionData);
   useEffect(() => {
     if (subscriptionData?.pendingOrders.id) {
       navigate(`/orders/${subscriptionData.pendingOrders.id}`);
@@ -68,9 +66,12 @@ const MyRestaurants = () => {
             </div>
           </>
         )}
-      <div className="w-full px-5 xl:px-1 max-w-screen-xl mx-auto mt-5">
-        <div className=" md:h-20 flex justify-around items-center">
-          <span className="text-xl md:text-3xl">나의 계정 상세정보</span>
+      <div className="w-full px-5 xl:px-1 max-w-screen-xl mx-auto m-5 md:mb-10">
+        <div className="flex flex-col md:relative md:h-20 justify-around items-center">
+          <h4 className=" text-xl md:text-3xl">나의 계정 상세정보</h4>
+          <button className=" p-1 md:px-2 mt-2 bg-lime-600 text-white md:absolute md:top-3 md:right-0">
+            <Link to="/add-restaurant">새로운 음식점 만들기</Link>
+          </button>
         </div>
         <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7 mt-10">
           {data?.myRestaurants.restaurants?.map((restaurant) => (

@@ -80,7 +80,6 @@ const MyRestaurant = () => {
   const { data: subscriptionData } = useSubscription<PendingOrdersSubscription>(
     PENDING_ORDERS_SUBSCRIPTION
   );
-  console.log(subscriptionData);
 
   const triggerPaddle = () => {
     // @ts-ignore
