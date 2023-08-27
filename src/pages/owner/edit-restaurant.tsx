@@ -5,12 +5,14 @@ import { gql } from "../../__generated__/gql";
 import {
   DeleteRestaurantMutation,
   DeleteRestaurantMutationVariables,
+  EditRestaurantMutation,
+  EditRestaurantMutationVariables,
   MyRestaurantQuery,
   MyRestaurantQueryVariables,
 } from "../../__generated__/graphql";
 import { MY_RESTAURANT_QUERY } from "./owner-restaurant";
 import { Helmet } from "react-helmet-async";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import FormError from "../../components/form-error";
 import Button from "../../components/button";
 
@@ -23,48 +25,60 @@ const DELETE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
   }
 `);
 
-interface IDeleteRestaurantProps {
-  restaurantId: number;
-}
-
-interface IEditRestaurantForm {
-  name: string;
-  address?: string;
-  categoryName?: string;
-  file?: FileList;
-}
+const EDIT_RESTAURANT_MUTATION = gql(/* GraphQL */ `
+  mutation editRestaurant($input: EditRestaurantInput!) {
+    editRestaurant(input: $input) {
+      ok
+      error
+    }
+  }
+`);
 
 const EditRestaurant = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
 
-  const { data, loading } = useQuery<
-    MyRestaurantQuery,
-    MyRestaurantQueryVariables
-  >(MY_RESTAURANT_QUERY, {
-    variables: {
-      input: {
-        id: +id!,
+  const { data } = useQuery<MyRestaurantQuery, MyRestaurantQueryVariables>(
+    MY_RESTAURANT_QUERY,
+    {
+      variables: {
+        input: {
+          id: +id!,
+        },
       },
+    }
+  );
+  console.log(data);
+
+  const [editRestaurantMutation, { data: editRestaurantResult }] = useMutation<
+    EditRestaurantMutation,
+    EditRestaurantMutationVariables
+  >(EDIT_RESTAURANT_MUTATION, {
+    onCompleted: (data: EditRestaurantMutation) => {
+      const {
+        editRestaurant: { ok },
+      } = data;
+      if (ok) {
+        setUploading(false);
+        navigate(`/restaurant/${id}`);
+      }
     },
   });
-
-  const onCompleted = (data: DeleteRestaurantMutation) => {
-    const {
-      deleteRestaurant: { ok },
-    } = data;
-    if (ok) {
-      setUploading(false);
-      navigate("/");
-    }
-  };
 
   const [deleteRestaurantMutation, { data: deleteRstaurantResult }] =
     useMutation<DeleteRestaurantMutation, DeleteRestaurantMutationVariables>(
       DELETE_RESTAURANT_MUTATION,
       {
-        onCompleted,
+        onCompleted: (data: DeleteRestaurantMutation) => {
+          const {
+            deleteRestaurant: { ok },
+          } = data;
+          if (ok) {
+            setUploading(false);
+            navigate("/");
+          }
+        },
       }
     );
 
@@ -83,9 +97,53 @@ const EditRestaurant = () => {
     mode: "onChange",
   });
 
-  const onSubmit = () => {
-    setUploading(true);
-    console.log(getValues());
+  const onSubmit = async () => {
+    try {
+      setUploading(true);
+      const { name, categoryName, address, file } = getValues();
+      console.log(file);
+      if (!file) {
+        const coverImg = data?.myRestaurant.restaurant?.coverImg;
+        editRestaurantMutation({
+          variables: {
+            input: {
+              restaurantId: +id!,
+              name,
+              categoryName,
+              address,
+              coverImg,
+            },
+          },
+        });
+      } else if (file) {
+        const actualFile = file[0];
+        const formBody = new FormData();
+        formBody.append("file", actualFile);
+        // graphQl mutation을 통해 file을 처리하지 못한다. url 이 서로 다름.그래서 API post
+        const { url: coverImg } = await (
+          await fetch("http://localhost:4000/uploads/", {
+            method: "POST",
+            body: formBody,
+          })
+        ).json();
+        console.log("새파일:", coverImg);
+        editRestaurantMutation({
+          variables: {
+            input: {
+              restaurantId: +id!,
+              name,
+              categoryName,
+              address,
+              coverImg,
+            },
+          },
+        });
+      }
+
+      setUploading(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleDelete = () => {
@@ -180,10 +238,14 @@ const EditRestaurant = () => {
               className="input my-3"
             />
           </div>
-          <Button canClick={isValid} loading={loading} actionText="수정하기" />
-          {deleteRstaurantResult?.deleteRestaurant.error && (
+          <Button
+            canClick={isValid}
+            loading={uploading}
+            actionText="수정하기"
+          />
+          {editRestaurantResult?.editRestaurant.error && (
             <FormError
-              errorMessage={deleteRstaurantResult.deleteRestaurant.error}
+              errorMessage={editRestaurantResult.editRestaurant.error}
             />
           )}
           <div
@@ -192,6 +254,11 @@ const EditRestaurant = () => {
           >
             삭제하기
           </div>
+          {deleteRstaurantResult?.deleteRestaurant.error && (
+            <FormError
+              errorMessage={deleteRstaurantResult.deleteRestaurant.error}
+            />
+          )}
         </form>
       </div>
     </div>

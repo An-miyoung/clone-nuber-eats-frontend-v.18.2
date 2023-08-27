@@ -12,7 +12,7 @@ import FormError from "../../components/form-error";
 import Button from "../../components/button";
 import { MY_RESTAURANTS_QUERY } from "./owner-restaurants";
 
-const CREATE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
+export const CREATE_RESTAURANT_MUTATION = gql(/* GraphQL */ `
   mutation createRestaurant($input: CreateRestaurantInput!) {
     createRestaurant(input: $input) {
       ok
