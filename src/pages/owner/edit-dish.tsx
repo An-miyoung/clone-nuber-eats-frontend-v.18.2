@@ -1,101 +1,69 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, useParams } from "react-router-dom";
-import { useMutation } from "@apollo/client";
 import { useForm } from "react-hook-form";
-import { gql } from "../../__generated__/gql";
-import {
-  CreateDishMutation,
-  CreateDishMutationVariables,
-} from "../../__generated__/graphql";
+import { useNavigate, useParams } from "react-router-dom";
 import FormError from "../../components/form-error";
 import Button from "../../components/button";
-import { MY_RESTAURANT_QUERY } from "./owner-restaurant";
+import { gql } from "../../__generated__/gql";
+import { useMutation } from "@apollo/client";
+import {
+  DeleteDishMutation,
+  DeleteDishMutationVariables,
+} from "../../__generated__/graphql";
 
-const CREATE_DISH_MUTATION = gql(/* GraphQL */ `
-  mutation createDish($input: CreateDishInput!) {
-    createDish(input: $input) {
+const DELETE_DISH_MUTATION = gql(/* GraphQL */ `
+  mutation deleteDish($input: DeleteDishInput!) {
+    deleteDish(input: $input) {
       ok
       error
     }
   }
 `);
 
-const AddDish = () => {
-  const { id } = useParams<{ id: string }>();
+const EditDish = () => {
+  const params = useParams();
   const navigate = useNavigate();
+  console.log(params.id);
+  const [optionsNumber, setOptionsNumber] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [optionsNumber, setOptionsNumber] = useState<number[]>([]);
-
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors, isValid },
-  } = useForm({
-    mode: "onChange",
+  } = useForm();
+
+  const [deleteDishMutation, { data: deleteDishResult }] = useMutation<
+    DeleteDishMutation,
+    DeleteDishMutationVariables
+  >(DELETE_DISH_MUTATION, {
+    onCompleted: (data: DeleteDishMutation) => {
+      const {
+        deleteDish: { ok },
+      } = data;
+      if (ok && data) {
+        setUploading(false);
+        navigate(-1);
+      }
+    },
   });
 
-  const onAddOptionClick = () => {
-    setOptionsNumber((prev) => [Date.now(), ...prev]);
-  };
-  const onDeleteOptionClick = (idToDelete: number) => {
-    setOptionsNumber((prev) => prev.filter((id) => id !== idToDelete));
-  };
+  const onSubmit = () => {};
 
-  const [createDishMutation, { data: createDishMutationResult }] = useMutation<
-    CreateDishMutation,
-    CreateDishMutationVariables
-  >(CREATE_DISH_MUTATION, {
-    refetchQueries: [
-      {
-        query: MY_RESTAURANT_QUERY,
-        variables: {
-          input: {
-            id: +id!,
-          },
+  const onAddOptionClick = () => {};
+
+  const onDeleteOptionClick = (id: number) => {};
+
+  const handleDelete = () => {
+    window.alert("확인을 누르면 영구삭제됩니다.");
+    setUploading(true);
+    // 아이디를 들고 와서 backend에서 delete 하고 aws 에서 사진지우는 작업
+    deleteDishMutation({
+      variables: {
+        input: {
+          dishId: +params.id!,
         },
       },
-    ],
-  });
-
-  const onSubmit = async () => {
-    try {
-      setUploading(true);
-      const { name, price, description, file, ...rest } = getValues();
-
-      const optionsObject = optionsNumber.map((theId) => ({
-        name: rest[`${theId}-optionName`],
-        extraPrice: +rest[`${theId}-optionExtraPrice`],
-      }));
-
-      const actualFile = file[0];
-      const formBody = new FormData();
-      formBody.append("file", actualFile);
-      const { url: photo } = await (
-        await fetch("http://localhost:4000/uploads/", {
-          method: "POST",
-          body: formBody,
-        })
-      ).json();
-
-      createDishMutation({
-        variables: {
-          input: {
-            restaurantId: +id!,
-            name,
-            price: +price,
-            photo,
-            description,
-            options: optionsObject,
-          },
-        },
-      });
-      setUploading(false);
-      navigate(-1);
-    } catch (error) {
-      console.log(error);
-    }
+    });
   };
 
   return (
@@ -105,7 +73,7 @@ const AddDish = () => {
       </Helmet>
       <div className="w-full max-w-screen-sm flex flex-col items-center px-5">
         <h4 className="w-full text-left text-2xl md:text-3xl font-medium pl-2">
-          새로운 메뉴를 만듭니다.
+          메뉴를 수정합니다.
         </h4>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -182,7 +150,7 @@ const AddDish = () => {
                 optionsNumber.map((id) => (
                   <div key={id} className="mt-5 flex flex-col md:flex-row">
                     <input
-                      {...register(`${id}-optionName`)}
+                      // {...register(`${id}-optionName`)}
                       type="text"
                       placeholder="옵션 이름(eg. 매운정도)"
                       className=" py-1 px-3 mb-1 md:mb-0 md:mr-5 text-sm  focus:outline-none border-2 focus:border-gray-600"
@@ -190,7 +158,7 @@ const AddDish = () => {
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-row items-center justify-start">
                         <input
-                          {...register(`${id}-optionExtraPrice`)}
+                          // {...register(`${id}-optionExtraPrice`)}
                           type="number"
                           min={0}
                           defaultValue={0}
@@ -215,10 +183,19 @@ const AddDish = () => {
             loading={uploading}
             actionText="메뉴 만들기"
           />
-          {createDishMutationResult?.createDish.error && (
-            <FormError
-              errorMessage={createDishMutationResult.createDish.error}
-            />
+          {/* {createDishMutationResult?.createDish.error && (
+          <FormError
+            errorMessage={createDishMutationResult.createDish.error}
+          />
+        )} */}
+          <div
+            onClick={handleDelete}
+            className=" mt-5 text-red-600 text-center cursor-pointer"
+          >
+            삭제하기
+          </div>
+          {deleteDishResult?.deleteDish.error && (
+            <FormError errorMessage={deleteDishResult.deleteDish.error} />
           )}
         </form>
       </div>
@@ -226,4 +203,4 @@ const AddDish = () => {
   );
 };
 
-export default AddDish;
+export default EditDish;

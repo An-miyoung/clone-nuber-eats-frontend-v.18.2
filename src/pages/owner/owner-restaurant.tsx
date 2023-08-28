@@ -132,19 +132,19 @@ const MyRestaurant = () => {
           <div className="flex justify-between md:justify-start">
             <Link
               to={`/restaurant/${id}/add-dish`}
-              className=" mr-1 md:mr-8 text-white bg-gray-800 py-3 px-2 md:py-3 md:px-10"
+              className=" mr-1 md:mr-8 text-white bg-gray-800 py-1 px-2 md:py-3 md:px-10"
             >
               메뉴 만들기
             </Link>
             <span
               onClick={triggerPaddle}
-              className="mr-1 md:mr-8 cursor-pointer text-white bg-lime-700 py-2 px-3 md:py-3 md:px-10"
+              className="mr-1 md:mr-8 cursor-pointer text-white bg-lime-700 py-1 px-2 md:py-3 md:px-10"
             >
               프로모션 구매
             </span>
             <Link
               to={`/edit-restaurant/${id}`}
-              className=" mr-1 md:mr-8 text-gray-800 bg-gray-300 py-3 px-2 md:py-3 md:px-10"
+              className=" mr-1 md:mr-8 text-gray-800 bg-gray-300 py-1 px-2 md:py-3 md:px-10"
             >
               가게 정보수정
             </Link>
@@ -157,7 +157,7 @@ const MyRestaurant = () => {
                 {data?.myRestaurant.restaurant?.menu.map((dish) => (
                   <div key={dish.id} className="relative">
                     <div className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded">
-                      메뉴수정
+                      <Link to={`/edit-dish/${dish.id}`}>메뉴수정</Link>
                     </div>
                     <Dish
                       key={dish.id}

@@ -17,6 +17,7 @@ import AddDish from "../pages/owner/add-dish";
 import EditRestaurant from "../pages/owner/edit-restaurant";
 import Order from "../pages/order";
 import Dashboard from "../pages/driver/dashboard";
+import EditDish from "../pages/owner/edit-dish";
 
 const CommonRouters = [
   {
@@ -66,12 +67,16 @@ const RestaurantRouters = [
     element: <MyRestaurant />,
   },
   {
+    path: "/edit-restaurant/:id",
+    element: <EditRestaurant />,
+  },
+  {
     path: "/restaurant/:id/add-dish",
     element: <AddDish />,
   },
   {
-    path: "/edit-restaurant/:id",
-    element: <EditRestaurant />,
+    path: "/edit-dish/:id",
+    element: <EditDish />,
   },
 ];
 

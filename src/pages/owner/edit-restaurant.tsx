@@ -59,7 +59,7 @@ const EditRestaurant = () => {
       const {
         editRestaurant: { ok },
       } = data;
-      if (ok) {
+      if (ok && data) {
         setUploading(false);
         navigate(`/restaurant/${id}`);
       }
