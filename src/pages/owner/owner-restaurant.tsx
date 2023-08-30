@@ -153,11 +153,16 @@ const MyRestaurant = () => {
             {data?.myRestaurant.restaurant?.menu.length === 0 ? (
               <span>메뉴가 없습니다. 메뉴를 추가해 주세요.</span>
             ) : (
-              <div className=" grid md:grid-cols-3 gap-x-4 gap-y-7">
+              <div className=" w-full grid md:grid-cols-3 gap-x-4 gap-y-7">
                 {data?.myRestaurant.restaurant?.menu.map((dish) => (
-                  <div key={dish.id} className="relative">
+                  <div
+                    key={dish.id}
+                    className="relative border border-gray-400"
+                  >
                     <div className="absolute right-6 top-3.5 py-1 px-3 cursor-pointer  text-lime-800 bg-lime-300 rounded">
-                      <Link to={`/edit-dish/${dish.id}`}>메뉴수정</Link>
+                      <Link to={`/restaurant/${+id!}/edit-dish/${dish.id}`}>
+                        메뉴수정
+                      </Link>
                     </div>
                     <Dish
                       key={dish.id}

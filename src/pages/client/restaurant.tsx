@@ -253,9 +253,9 @@ const Restaurant = () => {
             </button>
           </div>
         )}
-        <div className="w-full grid lg:grid-cols-3 gap-x-4 gap-y-7">
+        <div className="w-full grid md:grid-cols-3 gap-x-4 gap-y-7">
           {data?.restaurant.restaurant?.menu.map((dish) => (
-            <div key={dish.id} className="relative">
+            <div key={dish.id} className="relative border border-gray-400">
               {orderStarted && (
                 <div
                   onClick={() => onClick(dish.id)}

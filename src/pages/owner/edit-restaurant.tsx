@@ -11,7 +11,7 @@ import {
   MyRestaurantQueryVariables,
 } from "../../__generated__/graphql";
 import { Helmet } from "react-helmet-async";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import FormError from "../../components/form-error";
 import Button from "../../components/button";
 import { MY_RESTAURANT_QUERY } from "./owner-restaurant";
@@ -35,21 +35,28 @@ const EDIT_RESTAURANT_MUTATION = gql(/* GraphQL */ `
   }
 `);
 
+interface IEditRestaurantForm {
+  name: string;
+  address: string;
+  categoryName: string;
+  file: FileList;
+}
+
 const EditRestaurant = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
 
-  const { data } = useQuery<MyRestaurantQuery, MyRestaurantQueryVariables>(
-    MY_RESTAURANT_QUERY,
-    {
-      variables: {
-        input: {
-          id: +id!,
-        },
+  const { data: resaturantData } = useQuery<
+    MyRestaurantQuery,
+    MyRestaurantQueryVariables
+  >(MY_RESTAURANT_QUERY, {
+    variables: {
+      input: {
+        id: +id!,
       },
-    }
-  );
+    },
+  });
 
   const [editRestaurantMutation, { data: editRestaurantResult }] = useMutation<
     EditRestaurantMutation,
@@ -64,7 +71,16 @@ const EditRestaurant = () => {
         navigate(`/restaurant/${id}`);
       }
     },
-    refetchQueries: [{ query: MY_RESTAURANTS_QUERY }],
+    refetchQueries: [
+      {
+        query: MY_RESTAURANT_QUERY,
+        variables: {
+          input: {
+            id: +id!,
+          },
+        },
+      },
+    ],
   });
 
   const [deleteRestaurantMutation, { data: deleteRstaurantResult }] =
@@ -87,24 +103,23 @@ const EditRestaurant = () => {
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { isValid, errors },
-  } = useForm({
+  } = useForm<IEditRestaurantForm>({
     defaultValues: {
-      name: data?.myRestaurant.restaurant?.name,
-      address: data?.myRestaurant.restaurant?.address,
-      categoryName: data?.myRestaurant.restaurant?.category?.name,
-      file: null,
+      name: resaturantData?.myRestaurant.restaurant?.name,
+      address: resaturantData?.myRestaurant.restaurant?.address,
+      categoryName: resaturantData?.myRestaurant.restaurant?.category?.name,
+      file: null || undefined,
     },
     mode: "onChange",
   });
 
-  const onSubmit = async () => {
+  const onSubmit: SubmitHandler<IEditRestaurantForm> = async (data) => {
     try {
       setUploading(true);
-      const { name, categoryName, address, file } = getValues();
+      const { name, categoryName, address, file } = data;
       if (!file) {
-        const coverImg = data?.myRestaurant.restaurant?.coverImg;
+        const coverImg = resaturantData?.myRestaurant.restaurant?.coverImg;
         editRestaurantMutation({
           variables: {
             input: {

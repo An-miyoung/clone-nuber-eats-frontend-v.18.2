@@ -75,7 +75,7 @@ const RestaurantRouters = [
     element: <AddDish />,
   },
   {
-    path: "/edit-dish/:id",
+    path: "/restaurant/:restaurantId/edit-dish/:dishId",
     element: <EditDish />,
   },
 ];
