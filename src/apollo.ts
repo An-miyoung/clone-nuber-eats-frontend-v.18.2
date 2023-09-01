@@ -9,7 +9,6 @@ import { setContext } from "@apollo/client/link/context";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { LOCALSTORAGE_TOKEN } from "./constants";
-import { SubscriptionClient } from "subscriptions-transport-ws";
 
 const token = localStorage.getItem(LOCALSTORAGE_TOKEN);
 export const isLoggedInVar = makeVar(Boolean(token));
@@ -26,16 +25,17 @@ export const authTokenVar = makeVar(token);
 // });
 
 // 진행상태를 subscribe 할 수 있게 해주는 게 websocket link
-const wsLink = new WebSocketLink(
-  new SubscriptionClient(
-    "wss://clone-uber-eats-backend.herokuapp.com/graphql",
-    {
-      connectionParams: {
-        "x-jwt": authTokenVar() || "",
-      },
-    }
-  )
-);
+const wsLink = new WebSocketLink({
+  uri:
+    process.env.NODE_ENV === "production"
+      ? "wss://clone-uber-eats-backend.herokuapp.com/graphql"
+      : "ws://localhost:4000/graphql",
+  options: {
+    connectionParams: {
+      "x-jwt": authTokenVar() || "",
+    },
+  },
+});
 
 const httpLink = createHttpLink({
   uri:
