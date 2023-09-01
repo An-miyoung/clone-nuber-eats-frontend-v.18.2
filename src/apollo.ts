@@ -6,7 +6,6 @@ import {
   split,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-import { SubscriptionClient } from "subscriptions-transport-ws";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { LOCALSTORAGE_TOKEN } from "./constants";
