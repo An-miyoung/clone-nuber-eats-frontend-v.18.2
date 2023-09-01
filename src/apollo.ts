@@ -26,16 +26,23 @@ export const authTokenVar = makeVar(token);
 // });
 
 // 진행상태를 subscribe 할 수 있게 해주는 게 websocket link
-const wsLink = new WebSocketLink(
-  new SubscriptionClient("ws://localhost:4000/graphql", {
+const wsLink = new WebSocketLink({
+  uri:
+    process.env.NODE_ENV === "production"
+      ? "wss://clone-uber-eats-backend.herokuapp.com/graphql"
+      : "ws://localhost:4000/graphql",
+  options: {
     connectionParams: {
       "x-jwt": authTokenVar() || "",
     },
-  })
-);
+  },
+});
 
 const httpLink = createHttpLink({
-  uri: "http://localhost:4000/graphql",
+  uri:
+    process.env.NODE_ENV === "production"
+      ? "https://clone-uber-eats-backend.herokuapp.com/graphql"
+      : "http://localhost:4000/graphql",
 });
 // http 를 통해 인증된 상태임을 backend 에 보내줄때 사용
 const authLink = setContext((_, { headers }) => {
