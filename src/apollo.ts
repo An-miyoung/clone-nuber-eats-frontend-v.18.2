@@ -28,7 +28,7 @@ export const authTokenVar = makeVar(token);
 const wsLink = new WebSocketLink({
   uri:
     process.env.NODE_ENV === "production"
-      ? "ws://clone-uber-eats-backend.herokuapp.com/graphql"
+      ? "wss://clone-uber-eats-backend.herokuapp.com/graphql"
       : "ws://localhost:4000/graphql",
   options: {
     connectionParams: {
