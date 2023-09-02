@@ -85,7 +85,7 @@ const splitLink = split(
 
 export const client = new ApolloClient({
   // authLink.concat(httpLink) 대신 http와 ws 가 결합된 splitLink 사용
-  link: splitLink,
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
