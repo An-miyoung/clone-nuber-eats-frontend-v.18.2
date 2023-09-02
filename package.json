@@ -16,6 +16,7 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.0.2",
+    "cross-env": "^7.0.3",
     "google-map-react": "^2.2.1",
     "graphql": "^16.7.1",
     "postcss": "^8.1.9",
@@ -32,7 +33,7 @@
   },
   "scripts": {
     "compile": "graphql-codegen",
-    "tailwind:prodbuild": "NODE_ENV=production npm run tailwind:build",
+    "tailwind:prodbuild": "cross-env NODE_ENV=production npm run tailwind:build",
     "tailwind:build": "tailwind build -i ./src/styles/tailwind.css -o ./src/styles/styles.css",
     "start": "npm run compile & npm run tailwind:build & react-scripts start",
     "build": "CI=false react-scripts build",
