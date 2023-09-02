@@ -41,7 +41,7 @@ export const authTokenVar = makeVar(token);
 const httpLink = createHttpLink({
   uri:
     process.env.NODE_ENV === "production"
-      ? "https://clone-uber-eats-backend-17fb1c87bea0.herokuapp.com"
+      ? "https://clone-uber-eats-backend.herokuapp.com/graphql"
       : "http://localhost:4000/graphql",
 });
 
